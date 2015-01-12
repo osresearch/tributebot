@@ -17,7 +17,9 @@ class TributeBot(TBot):
 	print self.api.rate_limit_status()
 	count = 0
 	p = re.compile(r"([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
-        for msg in tweepy.Cursor(self.api.search, q=query).items():
+        for msgs in tweepy.Cursor(self.api.search, q=query, count=100).pages():
+          print "---" + str(count)
+	  for msg in msgs:
             count = count + 1
             t = msg.text
             if count % 100 == 0:
