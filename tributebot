@@ -16,7 +16,7 @@ class TributeBot(TBot):
 	#query="scruffles"
 	print self.api.rate_limit_status()
 	count = 0
-	r = re.compile(r"([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
+	p = re.compile(r"([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
         for msg in tweepy.Cursor(self.api.search, q=query).items():
             count = count + 1
             t = msg.text
