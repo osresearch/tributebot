@@ -3,9 +3,48 @@ import re
 import tweepy
 import time
 import sys
+import json
 reload(sys)
 sys.setdefaultencoding('utf-8')
 from botomatic import TBot
+from tweepy.streaming import StreamListener
+from tweepy import Stream
+
+class StdOutListener(StreamListener):
+    """ A listener handles tweets are the received from the stream.
+    This is a basic listener that just prints received tweets to stdout.
+    """
+    def on_data(self, data):
+        #print(data)
+	self.count = self.count + 1
+	if self.count % 100 == 0:
+		print >>sys.stderr, "--- " + str(self.count)
+
+	msg = json.loads(data)
+	t = msg['text']
+	m = self.p.match(t)
+	if m is None:
+		return True
+	u = msg['user']['screen_name']
+	id = msg['id']
+	print str(id) + ": @" + u + ": " + t
+	try:
+		if u != "godtributes":
+			self.api.retweet(id)
+			pass
+	except:
+		print >>sys.stderr, "retweet failed"
+	return True
+
+    def on_error(self, status):
+        print >>sys.stderr, "ERROR:" + status
+
+    def __init__(self):
+	self.count = 0
+	self.p = re.compile(
+		r".*([^\s]+)s? (for|unto) the \1 (god|goddess)",
+		re.IGNORECASE
+	)
 
 class TributeBot(TBot):
     debug_mode = False
@@ -15,10 +54,17 @@ class TributeBot(TBot):
         super(TributeBot, self).__init__(handle)
 
     def run(self):
+        l = StdOutListener()
+	l.api = self.api
+        stream = Stream(self.auth, l)
+        #stream.filter(track=["('for the' OR 'unto the') (god OR gods OR goddess OR goddesses)"])
+        stream.filter(track=["god", "gods", "goddess", "goddesses"])
+        self.wrap_up()
+
+"""
 	query="('for the' OR 'unto the') (god OR gods OR goddess OR goddesses)"
 	#print self.api.rate_limit_status()
 	count = 0
-	p = re.compile(r".*([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
         for msgs in tweepy.Cursor(self.api.search, q=query, count=100).pages():
           print >>sys.stderr, "---" + str(len(msgs)) + " " + str(count)
 	  for msg in msgs:
@@ -37,8 +83,8 @@ class TributeBot(TBot):
             except:
               print >>sys.stderr, "retweet failed"
           time.sleep(5)
+"""
 
-        self.wrap_up()
 
 
 
