@@ -2,6 +2,9 @@ import random
 import re
 import tweepy
 import time
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 from botomatic import TBot
 
 class TributeBot(TBot):
@@ -12,11 +15,11 @@ class TributeBot(TBot):
         super(TributeBot, self).__init__(handle)
 
     def run(self):
-	query="('for the' god) OR ('for the' gods)"
+	query="god OR gods OR goddess OR goddesses"
 	#query="scruffles"
 	print self.api.rate_limit_status()
 	count = 0
-	p = re.compile(r"([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
+	p = re.compile(r".*([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
         for msgs in tweepy.Cursor(self.api.search, q=query, count=100).pages():
           print "---" + str(count)
 	  for msg in msgs:
@@ -26,10 +29,10 @@ class TributeBot(TBot):
 	        print "count: " + str(count)
                 time.sleep(10)
 
+            print msg.user.screen_name.encode('utf-8') + u": " + msg.text.encode('utf-8')
             m = p.match(msg.text)
             if m is None:
                 continue
-            print msg.user.screen_name + ": " + msg.text
             print "*************** " + str(msg.id)
             if re.search("scruffle", msg.text) is None:
 		    self.api.retweet(msg.id)
