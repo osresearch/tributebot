@@ -15,27 +15,28 @@ class TributeBot(TBot):
         super(TributeBot, self).__init__(handle)
 
     def run(self):
-	query="god OR gods OR goddess OR goddesses"
-	#query="scruffles"
-	print self.api.rate_limit_status()
+	query="('for the' OR 'unto the') (god OR gods OR goddess OR goddesses)"
+	#print self.api.rate_limit_status()
 	count = 0
 	p = re.compile(r".*([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
         for msgs in tweepy.Cursor(self.api.search, q=query, count=100).pages():
-          print "---" + str(count)
+          print >>sys.stderr, "---" + str(len(msgs)) + " " + str(count)
 	  for msg in msgs:
             count = count + 1
             t = msg.text
-            if count % 100 == 0:
-	        print "count: " + str(count)
-                time.sleep(10)
 
-            print msg.user.screen_name.encode('utf-8') + u": " + msg.text.encode('utf-8')
             m = p.match(msg.text)
             if m is None:
                 continue
-            print "*************** " + str(msg.id)
-            if re.search("scruffle", msg.text) is None:
-		    self.api.retweet(msg.id)
+            print msg.user.screen_name.encode('utf-8') + u": " + msg.text.encode('utf-8')
+            print >>sys.stderr, "*** " + str(msg.id) + " @" + msg.user.screen_name
+	    #print msg
+            try:
+              if msg.user.screen_name != "godtributes":
+	        self.api.retweet(msg.id)
+            except:
+              print >>sys.stderr, "retweet failed"
+          time.sleep(5)
 
         self.wrap_up()
 
