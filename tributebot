@@ -1,27 +1,40 @@
 import random
+import re
+import tweepy
+import time
 from botomatic import TBot
 
-RESPONSES = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes definitely', 'You may rely on it', 'As I see it yes', 'Most likely', 'Outlook good', 'Yes', 'Signs point to yes', 'Reply hazy try again', 'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again', 'Don\'t count on it', 'My reply is no', 'My sources say no', 'Outlook not so good', 'Very doubtful']
-
-print "startup"
-
-class Magic8Ball(TBot):
+class TributeBot(TBot):
     debug_mode = False
 
     def __init__(self):
-        handle = "qrs"
-        super(Magic8Ball, self).__init__(handle)
+        handle = "TributeBot"
+        super(TributeBot, self).__init__(handle)
 
     def run(self):
-        print "looking for mentions"
-        for msg in self.handle_mentions():
-            reply = "@%s %s" % (msg.user.screen_name, random.choice(RESPONSES))
-            print reply
-            #self.tweets.append((reply, msg.id))
+	query="('for the' god) OR ('for the' gods)"
+	#query="scruffles"
+	print self.api.rate_limit_status()
+	count = 0
+	r = re.compile(r"([^\s]+)s? (for|unto) the \1 (god|goddess)", re.IGNORECASE)
+        for msg in tweepy.Cursor(self.api.search, q=query).items():
+            count = count + 1
+            t = msg.text
+            if count % 100 == 0:
+	        print "count: " + str(count)
+                time.sleep(10)
+
+            m = p.match(msg.text)
+            if m is None:
+                continue
+            print msg.user.screen_name + ": " + msg.text
+            print "*************** " + str(msg.id)
+            if re.search("scruffle", msg.text) is None:
+		    self.api.retweet(msg.id)
 
         self.wrap_up()
 
 
 
 if __name__ == '__main__':
-    m = Magic8Ball()
+    m = TributeBot()
