@@ -42,7 +42,7 @@ class StdOutListener(StreamListener):
     def __init__(self):
 	self.count = 0
 	self.p = re.compile(
-		r".*([^\s]+)s? (for|unto) the \1 (god|goddess)",
+		r".*(.+)s? (to|for|unto) the \1 (god|goddess|king|queen)",
 		re.IGNORECASE
 	)
 
@@ -58,7 +58,7 @@ class TributeBot(TBot):
 	l.api = self.api
         stream = Stream(self.auth, l)
         #stream.filter(track=["('for the' OR 'unto the') (god OR gods OR goddess OR goddesses)"])
-        stream.filter(track=["god", "gods", "goddess", "goddesses"])
+        stream.filter(track=["god", "gods", "goddess", "goddesses", "king", "kings", "queen", "queens"])
         self.wrap_up()
 
 """
